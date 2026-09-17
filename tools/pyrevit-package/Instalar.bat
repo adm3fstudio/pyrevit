@@ -3,9 +3,10 @@ setlocal
 REM Instalador do pacote pyRevit - clique duplo neste arquivo.
 set "PKG=%~dp0"
 set "PS1=%PKG%tools\Install-PyRevitPackage.ps1"
+if not exist "%PS1%" set "PS1=%PKG%Install-PyRevitPackage.ps1"
 
 if not exist "%PS1%" (
-  echo [ERRO] tools\Install-PyRevitPackage.ps1 nao encontrado.
+  echo [ERRO] Install-PyRevitPackage.ps1 nao encontrado.
   echo Extraia o .zip por completo antes de rodar este instalador.
   pause
   exit /b 1
