@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Instala na maquina atual um pacote gerado por Export-PyRevitPackage.ps1.
 

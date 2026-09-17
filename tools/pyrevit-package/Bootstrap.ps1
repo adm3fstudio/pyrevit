@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Baixa as ferramentas de pacote do GitHub e instala a extensao nesta maquina.
 

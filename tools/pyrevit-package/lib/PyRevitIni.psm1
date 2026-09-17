@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Funcoes compartilhadas para ler/escrever o pyRevit_config.ini e localizar
     pastas de extensoes do pyRevit.

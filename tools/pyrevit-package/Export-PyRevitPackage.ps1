@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Empacota uma extensao do pyRevit (por padrao a 3fstudio) junto com as
     configuracoes relevantes, gerando um .zip pronto para instalar em outra maquina.
