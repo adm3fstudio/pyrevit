@@ -21,12 +21,15 @@ Tudo vive em `tools/pyrevit-package/`:
 | `Bootstrap.ps1` | Baixa as ferramentas do GitHub e chama export/install |
 | `lib/PyRevitIni.psm1` | Leitura/escrita/merge do ini do pyRevit |
 | `Empacotar.bat` / `Instalar.bat` | Atalhos de duplo clique |
+| `Diagnostico.ps1` | Relatório read-only do estado do pyRevit na máquina |
 | `README.md` | Documentação das duas pontas do fluxo |
 
 Comportamento já garantido: exclui `__pycache__`/`.git`/`*.pyc`; registra o
 diretório em `[core] userextensions` **sem apagar** os caminhos existentes;
 mescla só as seções da própria extensão (ex.: `[3fstudio.extension]`); faz
-backup da extensão anterior e do `.ini` antes de escrever; suporta `-WhatIf`.
+backup da extensão anterior e do `.ini` antes de escrever; suporta `-WhatIf`;
+esvazia credenciais (`password`, `token`, `secret`) na cópia que vai no pacote e
+nunca sobrescreve as que já existem na máquina de destino.
 
 ## O que foi testado (e o que não foi)
 
@@ -49,9 +52,7 @@ existe na W1 e como a W2 a alcança (`.zip` já gerado, pasta de rede, pendrive)
 1. Conferir o que já existe na máquina:
 
    ```powershell
-   dir "$env:APPDATA\pyRevit\Extensions"
-   type "$env:APPDATA\pyRevit\pyRevit_config.ini"
-   pyrevit --version
+   .\tools\pyrevit-package\Diagnostico.ps1
    ```
 
 2. Instalar, conforme o caso:

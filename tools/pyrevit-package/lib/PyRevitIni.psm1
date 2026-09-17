@@ -191,15 +191,21 @@ function Get-PyRevitExtensionSearchPath {
         try {
             $clones = $ini['environment']['clones'] | ConvertFrom-Json -ErrorAction Stop
             foreach ($prop in $clones.PSObject.Properties) {
-                $paths.Add((Join-Path $prop.Value 'extensions'))
+                if ([string]::IsNullOrWhiteSpace($prop.Value)) { continue }
+                # Concatenacao literal: o caminho do clone pode ter vindo de
+                # outra maquina e apontar para uma unidade inexistente aqui,
+                # o que faria Join-Path falhar ao resolver o drive.
+                $paths.Add(($prop.Value.TrimEnd('\', '/') + '\extensions'))
             }
         } catch {
             Write-Verbose 'Nao foi possivel interpretar [environment] clones.'
         }
     }
 
-    $paths.Add((Join-Path $env:APPDATA 'pyRevit\Extensions'))
-    $paths.Add((Join-Path $env:APPDATA 'pyRevit-Master\extensions'))
+    if ($env:APPDATA) {
+        $paths.Add((Join-Path $env:APPDATA 'pyRevit\Extensions'))
+        $paths.Add((Join-Path $env:APPDATA 'pyRevit-Master\extensions'))
+    }
     if ($env:ProgramData) {
         $paths.Add((Join-Path $env:ProgramData 'pyRevit\Extensions'))
         $paths.Add((Join-Path $env:ProgramData 'pyRevit-Master\extensions'))
@@ -253,6 +259,56 @@ function Copy-ExtensionTree {
         Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
+function Get-PyRevitSecretKeyPattern {
+    <#
+    .SYNOPSIS
+        Padroes de chaves do ini que carregam segredo e nao devem viajar.
+    .DESCRIPTION
+        O pyRevit guarda usuario e senha de repositorios privados de extensao
+        dentro da secao da propria extensao.
+    #>
+    [CmdletBinding()]
+    param()
+
+    @('password', 'passwd', 'pwd', 'token', 'apikey', 'api_key', 'secret', 'client_secret')
+}
+
+function Test-PyRevitSecretKey {
+    <#
+    .SYNOPSIS
+        Diz se o nome da chave indica um segredo.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string]$Key)
+
+    foreach ($pattern in (Get-PyRevitSecretKeyPattern)) {
+        if ($Key -like "*$pattern*") { return $true }
+    }
+    return $false
+}
+
+function Protect-PyRevitSecret {
+    <#
+    .SYNOPSIS
+        Esvazia os valores de chaves sensiveis do ini, no lugar.
+    .OUTPUTS
+        Os nomes "secao/chave" que foram esvaziados.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] $Ini)
+
+    $cleared = @()
+    foreach ($section in $Ini.Keys) {
+        foreach ($key in @($Ini[$section].Keys)) {
+            if (-not (Test-PyRevitSecretKey -Key $key)) { continue }
+            if ([string]::IsNullOrWhiteSpace($Ini[$section][$key])) { continue }
+            $Ini[$section][$key] = ''
+            $cleared += "$section/$key"
+        }
+    }
+    return $cleared
+}
+
 Export-ModuleMember -Function @(
     'Get-PyRevitConfigPath',
     'Read-PyRevitIni',
@@ -260,6 +316,9 @@ Export-ModuleMember -Function @(
     'ConvertFrom-PyRevitList',
     'ConvertTo-PyRevitList',
     'Add-PyRevitExtensionPath',
+    'Get-PyRevitSecretKeyPattern',
+    'Test-PyRevitSecretKey',
+    'Protect-PyRevitSecret',
     'Get-PyRevitExtensionSearchPath',
     'Copy-ExtensionTree'
 )

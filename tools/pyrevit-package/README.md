@@ -3,6 +3,19 @@
 Ferramentas para levar a extensão **3fstudio** e as configurações do pyRevit de
 uma máquina para outra: um script empacota tudo num `.zip`, outro instala.
 
+## Antes de tudo: diagnóstico
+
+Rode em **qualquer uma das duas máquinas** para saber onde você está (nada é
+alterado — é só leitura):
+
+```powershell
+.\Diagnostico.ps1     # ou duplo clique em Diagnostico.bat
+```
+
+Ele lista a versão do pyRevit, o `pyRevit_config.ini`, todas as pastas de
+extensão registradas com o que há dentro, as versões do Revit instaladas, e diz
+se aquela máquina é a **origem** (tem a `3fstudio.extension`) ou o **destino**.
+
 ## Na máquina de origem (onde a extensão já funciona)
 
 1. Copie a pasta `tools/pyrevit-package` para a máquina.
@@ -90,6 +103,18 @@ Opções úteis:
 
 4. Abra o Revit. A aba da extensão deve aparecer; se não, use
    **pyRevit → Reload** ou confira em **pyRevit → Settings → Custom Extension Directories**.
+
+## Credenciais
+
+O `pyRevit_config.ini` guarda usuário e senha de repositórios privados de
+extensão. O empacotador **esvazia** os valores de chaves como `password`,
+`token` e `secret` antes de gravar a cópia no pacote, e avisa quais foram
+removidas — o `.zip` pode circular por pendrive ou e-mail sem levar segredo
+junto.
+
+Na instalação, a regra é a mesma em espelho: uma credencial já existente na
+máquina de destino **nunca** é sobrescrita pelo valor vazio do pacote, e se não
+houver nenhuma o instalador avisa qual preencher.
 
 ## O que *não* é copiado
 

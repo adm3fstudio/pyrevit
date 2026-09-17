@@ -131,6 +131,7 @@ if (-not $SkipConfig) {
     $packageConfig = Join-Path (Join-Path $packageRoot 'config') 'pyRevit_config.ini'
     $targetIni = Read-PyRevitIni -Path $ConfigPath
     $changed = $false
+    $pendingSecrets = @()
 
     if (Test-Path -LiteralPath $ConfigPath) {
         $iniBackup = "$ConfigPath.bak-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
@@ -163,7 +164,18 @@ if (-not $SkipConfig) {
 
             if (-not $targetIni.Contains($section)) { $targetIni[$section] = [ordered]@{} }
             foreach ($key in $sourceIni[$section].Keys) {
-                $targetIni[$section][$key] = $sourceIni[$section][$key]
+                $value = $sourceIni[$section][$key]
+
+                # Credenciais saem vazias do empacotador: nunca apagar a que ja
+                # existe nesta maquina, e avisar quando nao houver nenhuma.
+                if ((Test-PyRevitSecretKey -Key $key) -and [string]::IsNullOrWhiteSpace($value)) {
+                    $hasLocal = $targetIni[$section].Contains($key) -and
+                                -not [string]::IsNullOrWhiteSpace($targetIni[$section][$key])
+                    if (-not $hasLocal) { $pendingSecrets += "[$section] $key" }
+                    continue
+                }
+
+                $targetIni[$section][$key] = $value
             }
             Write-Host "Secao de configuracao aplicada: [$section]" -ForegroundColor Green
             $changed = $true
@@ -189,6 +201,11 @@ if (-not $SkipConfig) {
         }
     } else {
         Write-Verbose 'Pacote sem config/pyRevit_config.ini; apenas o caminho foi registrado.'
+    }
+
+    if ($pendingSecrets.Count -gt 0) {
+        Write-Warning ("Credenciais nao viajam no pacote. Preencha na tela do pyRevit ou no ini: " +
+                       ($pendingSecrets -join ', '))
     }
 
     if ($changed -and $PSCmdlet.ShouldProcess($ConfigPath, 'Gravar configuracao')) {

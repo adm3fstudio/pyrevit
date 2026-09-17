@@ -123,14 +123,23 @@ foreach ($ext in $extensions) {
 
 $configIncluded = $false
 $extensionSections = @()
+$redactedKeys = @()
 if (-not $SkipConfig) {
     if (Test-Path -LiteralPath $ConfigPath) {
         $configDir = Join-Path $stagingRoot 'config'
         New-Item -ItemType Directory -Path $configDir -Force | Out-Null
-        Copy-Item -LiteralPath $ConfigPath -Destination (Join-Path $configDir 'pyRevit_config.ini') -Force
         $configIncluded = $true
 
         $ini = Read-PyRevitIni -Path $ConfigPath
+
+        # O ini guarda credenciais de repositorios privados de extensao. Elas
+        # nao viajam no pacote: quem instalar informa as suas.
+        $redactedKeys = @(Protect-PyRevitSecret -Ini $ini)
+        if ($redactedKeys.Count -gt 0) {
+            Write-Warning "Credenciais removidas da copia do pacote (informe-as na outra maquina): $($redactedKeys -join ', ')"
+        }
+        Write-PyRevitIni -Ini $ini -Path (Join-Path $configDir 'pyRevit_config.ini')
+
         foreach ($section in $ini.Keys) {
             foreach ($ext in $extensions) {
                 $extKey = $ext.Name -replace '\.(extension|lib)$', ''
@@ -156,6 +165,7 @@ $manifest = [pscustomobject]@{
     createdOnMachine  = $env:COMPUTERNAME
     pyrevitVersion    = $pyrevitVersion
     includesConfig    = $configIncluded
+    redactedKeys      = @($redactedKeys)
     configSections    = @($extensionSections | Select-Object -Unique)
     extensions        = @($manifestExtensions)
 }
