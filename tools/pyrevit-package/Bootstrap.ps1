@@ -35,6 +35,7 @@ param(
     [string]$ExportFrom,
     [string]$SourceConfig,
     [string]$TargetPath = (Join-Path $env:APPDATA 'pyRevit\Extensions'),
+    [string]$ConfigPath,
     [string]$RepoZipUrl = 'https://github.com/adm3fstudio/pyrevit/archive/refs/heads/claude/ecstatic-fermat-uvcz9i.zip',
     [switch]$IncludeCoreSettings,
     [switch]$SkipConfig
@@ -106,6 +107,7 @@ $installArgs = @{
     PackagePath = $PackagePath
     TargetPath  = $TargetPath
 }
+if ($ConfigPath) { $installArgs['ConfigPath'] = $ConfigPath }
 if ($IncludeCoreSettings) { $installArgs['IncludeCoreSettings'] = $true }
 if ($SkipConfig) { $installArgs['SkipConfig'] = $true }
 

@@ -18,6 +18,10 @@ function Get-PyRevitConfigPath {
     [CmdletBinding()]
     param()
 
+    if ([string]::IsNullOrWhiteSpace($env:APPDATA)) {
+        throw 'A variavel APPDATA nao esta definida nesta sessao. Informe o arquivo com -ConfigPath.'
+    }
+
     Join-Path $env:APPDATA 'pyRevit\pyRevit_config.ini'
 }
 
