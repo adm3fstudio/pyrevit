@@ -31,6 +31,30 @@ Se a extensão não for encontrada automaticamente, aponte a pasta:
 Outras opções: `-Name` (outra extensão), `-OutputPath`, `-SkipConfig`
 (só arquivos), `-NoZip` (deixa como pasta).
 
+## Atalho na máquina de destino (sem baixar nada antes)
+
+Abra o **PowerShell** e cole (uma linha só). Ele baixa as ferramentas deste
+repositório e já instala:
+
+```powershell
+iex (irm 'https://raw.githubusercontent.com/adm3fstudio/pyrevit/claude/ecstatic-fermat-uvcz9i/tools/pyrevit-package/Bootstrap.ps1')
+```
+
+Isso apenas deixa tudo pronto e mostra as opções. Para instalar direto, baixe o
+`Bootstrap.ps1` e chame com um dos dois modos:
+
+```powershell
+# 1) já tenho o .zip gerado na outra máquina
+.\Bootstrap.ps1 -PackagePath 'D:\3fstudio-pyrevit-package-20260917-1030.zip'
+
+# 2) enxergo a pasta da extensão pela rede / pendrive / OneDrive
+.\Bootstrap.ps1 -ExportFrom '\\W1\Compartilhado\3fstudio.extension' `
+                -SourceConfig '\\W1\Compartilhado\pyRevit_config.ini'
+```
+
+No modo 2 ele empacota a partir do caminho informado e instala em seguida — não
+é preciso mexer na máquina de origem.
+
 ## Na máquina de destino
 
 1. Instale o pyRevit normalmente (https://pyrevitlabs.io) e feche o Revit.
