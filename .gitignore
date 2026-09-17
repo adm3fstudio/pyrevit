@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# pyRevit: pastas "lib" sao parte legitima das extensoes (biblioteca Python da
+# extensao) e das ferramentas deste repositorio, entao escapam da regra "lib/"
+# generica do template Python acima.
+!tools/pyrevit-package/lib/
+!**/*.extension/**/lib/
+!**/*.extension/lib/
